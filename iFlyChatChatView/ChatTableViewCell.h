@@ -2,8 +2,8 @@
 //  ChatTableViewCell.h
 //  test
 //
-//  Created by Prateek Grover on 06/04/15.
-//  Copyright (c) 2015 Prateek Grover. All rights reserved.
+//  Created by iFlyLabs on 06/04/15.
+//  Copyright (c) 2015 iFlyLabs. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

@@ -2,8 +2,8 @@
 //  ApplicationData.h
 //  iFlyChatChatView
 //
-//  Created by Prateek Grover on 15/09/15.
-//  Copyright (c) 2015 Prateek Grover. All rights reserved.
+//  Created by iFlyLabs on 15/09/15.
+//  Copyright (c) 2015 iFlyLabs. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

@@ -2,8 +2,8 @@
 //  main.m
 //  iFlyChatChatView
 //
-//  Created by Prateek Grover on 31/07/15.
-//  Copyright (c) 2015 Prateek Grover. All rights reserved.
+//  Created by iFlyLabs on 31/07/15.
+//  Copyright (c) 2015 iFlyLabs. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

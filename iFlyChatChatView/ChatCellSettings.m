@@ -2,8 +2,8 @@
 //  ChatCellSettings.m
 //  iFlyChatChatView
 //
-//  Created by Prateek Grover on 27/08/15.
-//  Copyright (c) 2015 Prateek Grover. All rights reserved.
+//  Created by iFlyLabs on 27/08/15.
+//  Copyright (c) 2015 iFlyLabs. All rights reserved.
 //
 
 #import "ChatCellSettings.h"
