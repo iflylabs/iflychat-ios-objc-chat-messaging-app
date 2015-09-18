@@ -20,7 +20,6 @@
 		6E7112EB1B6B5E32001FDEC2 /* ChatTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E7112E71B6B5E32001FDEC2 /* ChatTableViewCell.m */; };
 		6E8CC7981B9EBF4E00312EAB /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E8CC7971B9EBF4E00312EAB /* ViewController.m */; };
 		6E8F10031B7B4FC100794CF6 /* DataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E8F10021B7B4FC100794CF6 /* DataClass.m */; };
-		6EA37D101BAC220F0007E55F /* iFlyChatLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EA37D0F1BAC220F0007E55F /* iFlyChatLibrary.framework */; };
 		6EBACA0C1BA8095A0076B0B3 /* ApplicationData.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EBACA0B1BA8095A0076B0B3 /* ApplicationData.m */; };
 		6EBACA0F1BA8096B0076B0B3 /* ApplicationSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EBACA0E1BA8096B0076B0B3 /* ApplicationSettings.m */; };
 /* End PBXBuildFile section */
@@ -60,7 +59,6 @@
 		6E8CC7971B9EBF4E00312EAB /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		6E8F10011B7B4FC100794CF6 /* DataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataClass.h; path = iFlyChatChatView/DataClass.h; sourceTree = "<group>"; };
 		6E8F10021B7B4FC100794CF6 /* DataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DataClass.m; path = iFlyChatChatView/DataClass.m; sourceTree = "<group>"; };
-		6EA37D0F1BAC220F0007E55F /* iFlyChatLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = iFlyChatLibrary.framework; sourceTree = "<group>"; };
 		6EBACA0A1BA8095A0076B0B3 /* ApplicationData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationData.h; sourceTree = "<group>"; };
 		6EBACA0B1BA8095A0076B0B3 /* ApplicationData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ApplicationData.m; sourceTree = "<group>"; };
 		6EBACA0D1BA8096B0076B0B3 /* ApplicationSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationSettings.h; sourceTree = "<group>"; };
@@ -72,7 +70,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6EA37D101BAC220F0007E55F /* iFlyChatLibrary.framework in Frameworks */,
 				6E6A5F9C1BA012F900DB6E55 /* libicucore.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -108,7 +105,6 @@
 		6E7112A01B6B5D8A001FDEC2 = {
 			isa = PBXGroup;
 			children = (
-				6EA37D0F1BAC220F0007E55F /* iFlyChatLibrary.framework */,
 				6E6A5F9B1BA012F900DB6E55 /* libicucore.dylib */,
 				6E7112AB1B6B5D8A001FDEC2 /* iFlyChatChatView */,
 				6E7112C51B6B5D8B001FDEC2 /* iFlyChatChatViewTests */,
@@ -459,7 +455,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iFlyChatChatView/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -473,7 +469,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iFlyChatChatView/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

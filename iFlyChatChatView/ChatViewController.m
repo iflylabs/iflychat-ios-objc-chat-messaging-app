@@ -512,7 +512,7 @@
                 dispatch_async(fetchImage, ^{
                     
                     
-                    [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",appData.loggedUser.getAvatarUrl IndexPath:indexPath userId:appData.loggedUser.getId];
+                    [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",appData.loggedUser.getAvatarUrl] IndexPath:indexPath userId:appData.loggedUser.getId];
                     
                 });
             }
@@ -568,7 +568,7 @@
                     dispatch_async(fetchImage, ^{
                         
                         
-                        [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",messageUser.getAvatarUrl IndexPath:indexPath userId:messageUser.getId];
+                        [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",messageUser.getAvatarUrl] IndexPath:indexPath userId:messageUser.getId];
                         
                     });
                 }
