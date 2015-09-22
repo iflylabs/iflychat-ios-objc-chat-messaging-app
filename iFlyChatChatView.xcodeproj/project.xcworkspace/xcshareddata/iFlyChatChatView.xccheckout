@@ -7,39 +7,27 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>F7084BDB-F953-4570-BB34-C464BF54D933</string>
 	<key>IDESourceControlProjectName</key>
-	<string>iFlyChatChatView</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>319986BB2DB48B2C192A16CC51EBC9C65059166F</key>
-		<string>github.com:iflylabs/iflychat-ios-objc-chat-messaging-app.git</string>
 		<key>E0C3E0FECF75122A185BF33935AFEC19E252D8D1</key>
 		<string>github.com:iflylabs/iflychat-ios-sdk.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>iFlyChatChatView.xcodeproj</string>
+	<string>iFlyChatExampleViews/iFlyChatExampleChatView/iFlyChatChatView.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>319986BB2DB48B2C192A16CC51EBC9C65059166F</key>
-		<string>../..</string>
 		<key>E0C3E0FECF75122A185BF33935AFEC19E252D8D1</key>
-		<string>../../../../GitHub%20Development%20Repository/iflychat-ios-sdk</string>
+		<string>../../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>github.com:iflylabs/iflychat-ios-objc-chat-messaging-app.git</string>
+	<string>github.com:iflylabs/iflychat-ios-sdk.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>319986BB2DB48B2C192A16CC51EBC9C65059166F</string>
+	<string>E0C3E0FECF75122A185BF33935AFEC19E252D8D1</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
-		<dict>
-			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.git</string>
-			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>319986BB2DB48B2C192A16CC51EBC9C65059166F</string>
-			<key>IDESourceControlWCCName</key>
-			<string>iflychat-ios-objc-chat-messaging-app</string>
-		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>

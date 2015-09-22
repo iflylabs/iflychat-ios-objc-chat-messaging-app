@@ -389,9 +389,21 @@
 {
     //Check which are the visible paths and how many messages are there. If the user is on last message then if a message is received, scroll the table view. If the user is not on the last message and a message is received then do not scroll the table view.
     NSArray *paths = [self.chatTable indexPathsForVisibleRows];
-    NSIndexPath *lastVisibleRowIndexPath = [paths objectAtIndex:(paths.count - 1)];
-    long lastVisibleRow = lastVisibleRowIndexPath.row;
-    long messageLastRow = currentMessages.count - 1;
+    
+    long lastVisibleRow;
+    long messageLastRow;
+    
+    if(paths.count == 0)
+    {
+        lastVisibleRow = 0;
+        messageLastRow = 0;
+    }
+    else
+    {
+        NSIndexPath *lastVisibleRowIndexPath = [paths objectAtIndex:(paths.count - 1)];
+        lastVisibleRow = lastVisibleRowIndexPath.row;
+        messageLastRow = currentMessages.count - 1;
+    }
     
     //Update the table view
     [self.chatTable beginUpdates];
@@ -512,7 +524,7 @@
                 dispatch_async(fetchImage, ^{
                     
                     
-                    [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",appData.loggedUser.getAvatarUrl] IndexPath:indexPath userId:appData.loggedUser.getId];
+                    [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",[appData.loggedUser.getAvatarUrl]] IndexPath:indexPath userId:appData.loggedUser.getId];
                     
                 });
             }
@@ -568,7 +580,7 @@
                     dispatch_async(fetchImage, ^{
                         
                         
-                        [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",messageUser.getAvatarUrl] IndexPath:indexPath userId:messageUser.getId];
+                        [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",[messageUser.getAvatarUrl]] IndexPath:indexPath userId:messageUser.getId];
                         
                     });
                 }
