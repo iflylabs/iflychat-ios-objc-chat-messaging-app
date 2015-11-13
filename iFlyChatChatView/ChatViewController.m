@@ -10,12 +10,20 @@
 #import "ChatTableViewCell.h"
 #import "ContentView.h"
 #import "DataClass.h"
+#import "Utility.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+@import MobileCoreServices;
 #define TimeStamp [NSString stringWithFormat:@"%f",[[NSDate date] timeIntervalSince1970] * 1000]
 
-@interface ChatViewController () <UITextViewDelegate>
+@interface ChatViewController () <UITextViewDelegate,UIDocumentPickerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate>
 
 @property (nonatomic,strong) ChatTableViewCell *chatCell;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *navBarUserLetterLabelHeight;
 @property (nonatomic,strong) iFlyChatUser *messageUser;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *navBarUserLetterLabelWidth;
+@property (weak, nonatomic) IBOutlet UILabel *navBarUserLetterLabel;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *navBarUserImageViewHeight;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *navBarUserImageViewWidth;
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *userImageHeight;
 
@@ -38,6 +46,8 @@
 
 @property (strong, nonatomic) iFlyChatOrderedDictionary *currentMessages;
 
+@property (weak, nonatomic) IBOutlet UIProgressView *uploadProgress;
+
 @end
 
 @implementation ChatViewController
@@ -56,6 +66,20 @@
     NSString *ROOMNAME;
     
     BOOL imageAlreadySetFlag;
+    
+    BOOL receivedMessageGetImage;
+    
+    BOOL use_default_avatar;
+    
+    BOOL newMedia;
+    
+    UIImagePickerController *ipc;
+    UIPopoverController *popover;
+    UIImageView *ivImage;
+    UIRefreshControl *loadMoreMessagesControl;
+    
+    dispatch_once_t setNavBarImage;
+    dispatch_once_t getLatestThreadHistory;
 }
 
 @synthesize chatTable;
@@ -115,6 +139,16 @@
     appData.roomMessages = [[NSMutableDictionary alloc] init];
     currentMessages = [[iFlyChatOrderedDictionary alloc] init];
     
+    receivedMessageGetImage = NO;
+    
+    use_default_avatar = NO;
+    
+    newMedia = NO;
+    
+    setNavBarImage = 0;
+    getLatestThreadHistory = 0;
+    
+    
     /**
      *  Configure chat here. Keep the USERID and USERNAME empty and fill in ROOMID and ROOMNAME if you need to chat in a room and vice-versa
      */
@@ -128,7 +162,6 @@
     if(![USERID isEqualToString:@""])
     {
         self.navigationItem.title = USERNAME;
-        self.userImage.image = [UIImage imageNamed:@"defaultUser.png"];
         
         //If the message dictionary is not set for this particular room then set it otherwise assign the already set message dictionary
         if([appData.userMessages objectForKey:USERID]==nil)
@@ -143,7 +176,9 @@
     else
     {
         self.navigationItem.title = ROOMNAME;
-        self.userImage.image = [UIImage imageNamed:@"defaultRoom.png"];
+        self.navBarUserImageView.image = [UIImage imageNamed:@"ChatRoom"];
+        self.navBarUserImageView.backgroundColor = [Utility getColorFromNameWithoutPrefix:ROOMNAME];
+        [self.navBarUserLetterLabel setHidden:YES];
         
         //If the message dictionary is not set for this particular room then set it otherwise assign the already set message dictionary
         if([appData.roomMessages objectForKey:ROOMID]==nil)
@@ -176,7 +211,14 @@
     [[self chatTable] registerClass:[ChatTableViewCell class] forCellReuseIdentifier:@"chatSend"];
 
     [[self chatTable] registerClass:[ChatTableViewCell class] forCellReuseIdentifier:@"chatReceive"];
+    
+    loadMoreMessagesControl = [[UIRefreshControl alloc] init];
+    [loadMoreMessagesControl addTarget:self
+                                action:@selector(loadMoreMessages)
+                      forControlEvents:UIControlEventValueChanged];
 
+    [self.chatTable addSubview:loadMoreMessagesControl];
+    
     //Instantiating custom view that adjusts itself to keyboard show/hide
     self.handler = [[ContentView alloc] initWithTextView:self.messageText ChatTextViewHeightConstraint:self.messageTextHeightConstraint contentView:self.contentView ContentViewHeightConstraint:self.contentViewHeightConstraint andContentViewBottomConstraint:self.contentViewBottomConstraint];
     
@@ -192,6 +234,7 @@
     
     fetchImage = dispatch_queue_create(NULL, DISPATCH_QUEUE_SERIAL);
     
+    [self.uploadProgress setHidden:YES];
     self.chatStatusView.backgroundColor = [UIColor yellowColor];
     [self.chatStatus setText:@"Authenticating and retrieving session key..."];
 }
@@ -209,6 +252,14 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setUserImage) name:@"onUpdatedGlobalList" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gotSessionKey:) name:@"iFlyChat.onGetSessionKey" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gotUserThreadHistory:) name:@"iFlyChat.onUserThreadHistory" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gotRoomThreadHistory:) name:@"iFlyChat.onRoomThreadHistory" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gotEmptyThreadHistory:) name:@"iFlyChat.onEmptyThreadHistory" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onUploadProgress:) name:@"iFlyChat.onUploadProgress" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detectOrientation) name:@"UIDeviceOrientationDidChangeNotification" object:nil];
 
@@ -239,17 +290,29 @@
     }
     else
     {
-        self.chatStatusView.backgroundColor = [UIColor greenColor];
-        [self.chatStatus setText:@"Connected"];
-        
-        [UIView animateWithDuration:0.5
-                         animations:^{
-                             self.chatStatusHeight.constant = 2;
-                             [self.chatStatusView.superview layoutIfNeeded];
-                         }
-                         completion:nil];
-        
-        self.chatStatus.text = @"";
+        dispatch_once(&getLatestThreadHistory, ^{
+            self.chatStatusView.backgroundColor = [UIColor greenColor];
+            [self.chatStatus setText:@"Connected"];
+            
+            [UIView animateWithDuration:0.5
+                             animations:^{
+                                 self.chatStatusHeight.constant = 2;
+                                 [self.chatStatusView.superview layoutIfNeeded];
+                             }
+                             completion:nil];
+            
+            self.chatStatus.text = @"";
+            
+            if(![USERID isEqualToString:@""])
+            {
+                [dtclass getUserThreadHistoryWithCurrentUserId:appData.loggedUser.getId forUserId:USERID forUserName:USERNAME messageId:@""];
+            }
+            else
+            {
+                [dtclass getRoomThreadHistoryWithCurrentUserId:appData.loggedUser.getId forRoomId:ROOMID forRoomName:ROOMNAME messageId:@""];
+            }
+            
+        });
         [self setUserImage];
     }
 }
@@ -262,7 +325,7 @@
 -(void)viewWillDisappear:(BOOL)animated
 {
     //Disconnect chat when the view disappears
-    [dtclass disconnect];
+    //[dtclass disconnect];
 }
 
 - (void) dismissKeyboard
@@ -310,6 +373,17 @@
                      completion:nil];
     
     self.chatStatus.text = @"";
+    
+    if(![USERID isEqualToString:@""])
+    {
+        [dtclass getUserThreadHistoryWithCurrentUserId:appData.loggedUser.getId forUserId:USERID forUserName:USERNAME messageId:@""];
+    }
+    else
+    {
+        [dtclass getRoomThreadHistoryWithCurrentUserId:appData.loggedUser.getId forRoomId:ROOMID forRoomName:ROOMNAME messageId:@""];
+    }
+    
+    [self setUserImage];
 }
 
 -(void) gotSessionKey:(NSNotification *)notification
@@ -318,6 +392,129 @@
     appData.sessionKey = [notification object];
     [self.chatStatus setText:@"Connecting to iFlyChat servers..."];
 }
+
+-(void) gotUserThreadHistory:(NSNotification *)notification
+{
+    NSDictionary *result = [notification object];
+    
+    if([[result objectForKey:@"forUserId"] isEqualToString:USERID])
+    {
+        [loadMoreMessagesControl endRefreshing];
+        iFlyChatOrderedDictionary *threadHistory = [result objectForKey:@"threadHistory"];
+        [threadHistory addObjectsFromOrderedDictionary:currentMessages];
+        currentMessages = threadHistory;
+        //iFlyChatOrderedDictionary *saveMessages = [[iFlyChatOrderedDictionary alloc] init];
+        //saveMessages = currentMessages;
+        //currentMessages = threadHistory;
+        //[currentMessages addObjectsFromOrderedDictionary:saveMessages];
+        [self.chatTable reloadData];
+        NSLog(@"Got thread history");
+    }
+    
+}
+
+-(void) gotRoomThreadHistory:(NSNotification *)notification
+{
+    NSDictionary *result = [notification object];
+    
+    if([[result objectForKey:@"forRoomId"] isEqualToString:ROOMID])
+    {
+        [loadMoreMessagesControl endRefreshing];
+        iFlyChatOrderedDictionary *threadHistory = [result objectForKey:@"threadHistory"];
+        [threadHistory addObjectsFromOrderedDictionary:currentMessages];
+        currentMessages = threadHistory;
+        //iFlyChatOrderedDictionary *saveMessages = [[iFlyChatOrderedDictionary alloc] init];
+        //saveMessages = currentMessages;
+        //currentMessages = threadHistory;
+        //[currentMessages addObjectsFromOrderedDictionary:saveMessages];
+        [self.chatTable reloadData];
+        NSLog(@"Got thread history");
+    }
+}
+
+-(void) gotEmptyThreadHistory:(NSNotification *)notification
+{
+    NSString *forId = [notification object];
+    
+    if([forId length] != 0)
+    {
+        if([forId isEqualToString:[USERID length] != 0 ? USERID : ROOMID ])
+        {
+            [loadMoreMessagesControl endRefreshing];
+        }
+        else
+        {
+            NSLog(@"Something wrong happened");
+        }
+    }
+    else
+    {
+        [loadMoreMessagesControl endRefreshing];
+    }
+}
+
+-(void) loadMoreMessages
+{
+    if([currentMessages count] != 0)
+    {
+        iFlyChatMessage *msg = [currentMessages objectAtIndex:0];
+        
+        if([USERID length] != 0)
+        {
+            [dtclass getUserThreadHistoryWithCurrentUserId:appData.loggedUser.getId forUserId:USERID forUserName:USERNAME messageId:msg.getMessageId];
+        }
+        else
+        {
+            [dtclass getRoomThreadHistoryWithCurrentUserId:appData.loggedUser.getId forRoomId:ROOMID forRoomName:ROOMNAME messageId:msg.getMessageId];
+        }
+    }
+    else
+    {
+        [loadMoreMessagesControl endRefreshing];
+    }
+}
+
+-(void) onUploadProgress:(NSNotification *)notification
+{
+    NSDictionary *result = [notification object];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //UILabel *uploadProgressLabel = [self.view viewWithTag:[[[result objectForKey:@"message_id"] substringFromIndex:10] integerValue]];
+        
+        //[uploadProgressLabel setText:[[result objectForKey:@"uploadProgress"] stringValue]];
+        if(self.uploadProgress.hidden)
+        {
+            [UIView animateWithDuration:0.5
+                             animations:^{
+                                 self.chatStatusHeight.constant = 49;
+                                 [self.chatStatusView.superview layoutIfNeeded];
+                             }
+                             completion:nil];
+            [self.uploadProgress setHidden:NO];
+            [self.chatStatusView setBackgroundColor:[UIColor whiteColor]];
+            [self.chatStatus setHidden:NO];
+            [self.chatStatus setText:@"Uploading"];
+            self.uploadProgress.progress = [[result objectForKey:@"uploadProgress"] floatValue];
+        }
+        else
+        {
+            self.uploadProgress.progress = [[result objectForKey:@"uploadProgress"] floatValue];
+            if(self.uploadProgress.progress == 1.0f)
+            {
+                [self.uploadProgress setHidden:YES];
+                [self.chatStatus setHidden:YES];
+                [UIView animateWithDuration:0.5
+                                 animations:^{
+                                     self.chatStatusHeight.constant = 2;
+                                     [self.chatStatusView.superview layoutIfNeeded];
+                                 }
+                                 completion:nil];
+            }
+        }
+    });
+}
+
+
 
 -(void) chatDisconnect
 {
@@ -334,17 +531,46 @@
         if(![USERID isEqualToString:@""])
         {
             //If avatar url is not empty
-            if([[[appData.userList objectForKey:USERID] getAvatarUrl] length]!=0)
+            NSString *avatarUrl = [[appData.userList objectForKey:USERID] getAvatarUrl];
+            if([avatarUrl length]!=0 && [avatarUrl rangeOfString:@"default_avatar"].location == NSNotFound && [avatarUrl rangeOfString:@"gravatar"].location == NSNotFound)
             {
                 //Download and set the image
                 NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",@"http:",[[appData.userList objectForKey:USERID] getAvatarUrl]]];
                 NSData *data = [[NSData alloc ] initWithContentsOfURL:url];
-        
+                
                 UIImage *img = [UIImage imageWithData:data];
-                self.userImage.image = img;
+                self.navBarUserImageView.image = img;
+                [self.navBarUserLetterLabel setHidden:YES];
+                self.navBarUserImageView.backgroundColor = [UIColor whiteColor];
+                imageAlreadySetFlag=YES;
+            }
+            else
+            {
+                if([self checkRegisteredUser:USERID] && use_default_avatar)
+                {
+                    [self.navBarUserLetterLabel setHidden:YES];
+                    [self setDefaultAvatarWithBackgroundColor:USERNAME userImageView:self.navBarUserImageView];
+                }
+                else if([self checkRegisteredUser:USERID] && !use_default_avatar)
+                {
+                    [self setLetterAvatarWithBackgroundColor:USERNAME userImageView:self.navBarUserImageView userLetterLabel:self.navBarUserLetterLabel];
+                }
+                else if([self checkRegisteredUser:USERID] && use_default_avatar)
+                {
+                    [self.navBarUserLetterLabel setHidden:YES];
+                    [self setDefaultAvatarWithBackgroundColor:[Utility getNameWithoutPrefix:USERNAME] userImageView:self.navBarUserImageView];
+                }
+                else
+                {
+                    [self setLetterAvatarWithBackgroundColor:[Utility getNameWithoutPrefix:USERNAME] userImageView:self.navBarUserImageView userLetterLabel:self.navBarUserLetterLabel];
+                }
+                imageAlreadySetFlag = NO;
             }
         }
-        imageAlreadySetFlag=YES;
+        else
+        {
+            imageAlreadySetFlag=YES;
+        }
     }
 }
 
@@ -424,6 +650,188 @@
     }
 }
 
+- (IBAction)uploadFile:(id)sender
+{
+    [self dismissKeyboard];
+    
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"Select your file to send"
+                                                             delegate:self
+                                                    cancelButtonTitle:@"Cancel"
+                                               destructiveButtonTitle:nil
+                                                    otherButtonTitles:@"Take photo/video", @"Photo/Video Library", @"Select file", nil];
+    
+    [actionSheet showInView:self.view];
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if(buttonIndex == 0)
+    {
+        ipc = [[UIImagePickerController alloc] init];
+        ipc.delegate = self;
+        if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+        {
+            ipc.sourceType = UIImagePickerControllerSourceTypeCamera;
+            ipc.mediaTypes = [[NSArray alloc] initWithObjects:(NSString *) kUTTypeMovie,(NSString *) kUTTypeImage, nil];
+            [self presentViewController:ipc animated:YES completion:NULL];
+            newMedia = YES;
+        }
+        else
+        {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"" message:@"No Camera Available." delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+            [alert show];
+            alert = nil;
+        }
+    }
+    else if(buttonIndex == 1)
+    {
+        ipc= [[UIImagePickerController alloc] init];
+        ipc.delegate = self;
+        ipc.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+        ipc.mediaTypes = [[NSArray alloc] initWithObjects:(NSString *) kUTTypeMovie,(NSString *) kUTTypeImage, nil];
+        if(UI_USER_INTERFACE_IDIOM()==UIUserInterfaceIdiomPhone)
+        {
+            [self presentViewController:ipc animated:YES completion:nil];
+            newMedia = NO;
+        }
+        else
+        {
+            popover=[[UIPopoverController alloc]initWithContentViewController:ipc];
+            [popover presentPopoverFromRect:actionSheet.frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+        }
+    }
+    else if(buttonIndex == 2)
+    {
+        UIDocumentPickerViewController *importMenu = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.composite-content"] inMode:UIDocumentPickerModeImport];
+        
+        
+        importMenu.delegate = self;
+        
+        [self presentViewController:importMenu animated:YES completion:nil];
+    }
+    
+    NSLog(@"Index = %ld - Title = %@", (long)buttonIndex, [actionSheet buttonTitleAtIndex:buttonIndex]);
+}
+
+-(void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentAtURL:(NSURL *)url
+{
+    [self createMessageObjectForFileUpload:url];
+}
+
+-(void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller
+{
+    
+}
+
+-(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    if(UI_USER_INTERFACE_IDIOM()==UIUserInterfaceIdiomPhone) {
+        [picker dismissViewControllerAnimated:YES completion:nil];
+    } else {
+        [popover dismissPopoverAnimated:YES];
+    }
+    
+    if(!newMedia)
+    {
+        
+        if([[info objectForKey:UIImagePickerControllerMediaType] isEqualToString:(NSString *)kUTTypeImage])
+        {
+            [self createMessageObjectForFileUpload:[info objectForKey:UIImagePickerControllerReferenceURL]];
+        }
+        else if([[info objectForKey:UIImagePickerControllerMediaType] isEqualToString:(NSString *)kUTTypeMovie])
+        {
+            [self createMessageObjectForFileUpload:[info objectForKey:UIImagePickerControllerMediaURL]];
+        }
+    }
+    else
+    {
+        ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+        
+        if([[info objectForKey:UIImagePickerControllerMediaType] isEqualToString:(NSString *)kUTTypeImage])
+        {
+            
+            CGImageRef image = [[info objectForKey:UIImagePickerControllerOriginalImage] CGImage];
+            [library writeImageToSavedPhotosAlbum:image
+                                      orientation:ALAssetOrientationUp
+                                  completionBlock:^(NSURL *assetURL, NSError *error) {
+                                      if(error == nil)
+                                      {
+                                          NSLog(@"%@",assetURL);
+                                          [self createMessageObjectForFileUpload:assetURL];
+                                      }
+                                      else
+                                      {
+                                          NSLog(@"%@",error);
+                                      }
+                                  }];
+        }
+        else if([[info objectForKey:UIImagePickerControllerMediaType] isEqualToString:(NSString *)kUTTypeMovie])
+        {
+            NSURL *videoUrl = [info objectForKey:UIImagePickerControllerMediaURL];
+            
+            if ([library videoAtPathIsCompatibleWithSavedPhotosAlbum:videoUrl])
+            {
+                
+                [library writeVideoAtPathToSavedPhotosAlbum:videoUrl completionBlock:^(NSURL *assetURL, NSError *error) {
+                    if (error)
+                    {
+                        NSLog(@"error");
+                    }
+                    else
+                    {
+                        NSLog(@"video assetUrl is %@", assetURL);
+                        [self createMessageObjectForFileUpload:assetURL];
+                    }
+                }];
+            }
+            else
+            {
+                NSLog(@"videoAtPath is not compatible with photos Album.");
+            }
+        }
+        
+    }
+    
+}
+
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
+
+-(void) createMessageObjectForFileUpload:(NSURL *)fileUrl
+{
+    iFlyChatMessage *sendMessage;
+    
+    //Make iFlyChatMessage objects according to where/with whom the user is chatting
+    if(![USERID isEqualToString:@""])
+    {
+        sendMessage = [[iFlyChatMessage alloc] initIFlyChatMessageObjectwithMessage:[fileUrl absoluteString] fromName:appData.loggedUser.getName toName:USERNAME fromId:appData.loggedUser.getId toId:USERID message_id:@"" color:@"#222222" fromProfileUrl:appData.loggedUser.getProfileUrl fromAvatarUrl:appData.loggedUser.getAvatarUrl fromRole:appData.loggedUser.getRole time:@"" type:@"user"];
+        [dtclass sendFileToUser:sendMessage];
+        
+    }
+    else
+    {
+        sendMessage = [[iFlyChatMessage alloc] initIFlyChatMessageObjectwithMessage:[fileUrl absoluteString] fromName:appData.loggedUser.getName toName:ROOMNAME fromId:appData.loggedUser.getId toId:ROOMID message_id:@"" color:@"#222222" fromProfileUrl:appData.loggedUser.getProfileUrl fromAvatarUrl:appData.loggedUser.getAvatarUrl fromRole:appData.loggedUser.getRole time:@"" type:@"room"];
+        [dtclass sendFileToRoom:sendMessage];
+    }
+    
+    if(self.uploadProgress.hidden)
+    {
+        [UIView animateWithDuration:0.5
+                         animations:^{
+                             self.chatStatusHeight.constant = 49;
+                             [self.chatStatusView.superview layoutIfNeeded];
+                         }
+                         completion:nil];
+        [self.uploadProgress setHidden:NO];
+        [self.chatStatusView setBackgroundColor:[UIColor whiteColor]];
+        [self.chatStatus setHidden:NO];
+        [self.chatStatus setText:@"Uploading"];
+        self.uploadProgress.progress = 0.0f;
+    }
+}
+
 
 
 - (IBAction)send
@@ -498,8 +906,16 @@
         
         [dateFormatter setDateFormat:@"dd/MM"];
         
-        NSTimeInterval epochMessageDateTime = [message.getTime doubleValue];
+        NSTimeInterval epochMessageDateTime;
         
+        if([message.getTime length] > 10)
+        {
+            epochMessageDateTime = [[message.getTime substringToIndex:[message.getTime length] - 3] doubleValue];
+        }
+        else
+        {
+            epochMessageDateTime = [message.getTime doubleValue];
+        }
         NSDate *messageDateTime = [[NSDate alloc] initWithTimeIntervalSince1970:epochMessageDateTime];
         
         NSDate *currentDateTime = [NSDate date];
@@ -518,23 +934,13 @@
         //Asynchronously downloading images after checking if they are available in cache
         if([userImageCache objectForKey:appData.loggedUser.getId] == nil)
         {
-            
-            if([[appData.loggedUser getAvatarUrl] length]!=0)
-            {
-                dispatch_async(fetchImage, ^{
-                    
-                    
-                    [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",[appData.loggedUser.getAvatarUrl]] IndexPath:indexPath userId:appData.loggedUser.getId];
-                    
-                });
-            }
-            
-            
-            chatCell.chatUserImage.image = [UIImage imageNamed:@"defaultUser.png"];
+            [self setChatImage:chatCell.chatUserImage userLetterLabel:chatCell.chatUserLetterLabel userId:appData.loggedUser.getId userName:appData.loggedUser.getName userAvatarUrl:appData.loggedUser.getAvatarUrl];
         }
         else
         {
             chatCell.chatUserImage.image = [userImageCache objectForKey:appData.loggedUser.getId];
+            chatCell.chatUserImage.backgroundColor = [UIColor whiteColor];
+            [chatCell.chatUserLetterLabel setHidden:YES];
         }
         chatCell.authorType = iFlyChatBubbleTableViewCellAuthorTypeSender;
     }
@@ -547,10 +953,19 @@
         
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         
-
+        
         [dateFormatter setDateFormat:@"dd/MM"];
         
-        NSTimeInterval epochMessageDateTime = [message.getTime doubleValue];
+        NSTimeInterval epochMessageDateTime;
+        
+        if([message.getTime length] > 10)
+        {
+            epochMessageDateTime = [[message.getTime substringToIndex:[message.getTime length] - 3] doubleValue];
+        }
+        else
+        {
+            epochMessageDateTime = [message.getTime doubleValue];
+        }
         
         NSDate *messageDateTime = [[NSDate alloc] initWithTimeIntervalSince1970:epochMessageDateTime];
         
@@ -568,35 +983,116 @@
 
         chatCell.chatTimeLabel.text = [dateFormatter stringFromDate:messageDateTime];
         
-        if([appData.userList objectForKey:message.getFromId] != nil)
+        receivedMessageGetImage=YES;
+        
+        if ([userImageCache objectForKey:message.getFromId] == nil)
         {
-            messageUser = [appData.userList objectForKey:message.getFromId];
-            
-            if([userImageCache objectForKey:messageUser.getId] == nil)
-            {
-                
-                if([[messageUser getAvatarUrl] length]!=0)
-                {
-                    dispatch_async(fetchImage, ^{
-                        
-                        
-                        [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",[messageUser.getAvatarUrl]] IndexPath:indexPath userId:messageUser.getId];
-                        
-                    });
-                }
-                
-                
-                chatCell.chatUserImage.image = [UIImage imageNamed:@"defaultUser.png"];
-            }
-            else
-            {
-                chatCell.chatUserImage.image = [userImageCache objectForKey:messageUser.getId];
-            }
+            [self setChatImage:chatCell.chatUserImage userLetterLabel:chatCell.chatUserLetterLabel userId:message.getFromId userName:message.getFromName userAvatarUrl:message.getFromAvatarUrl];
+        }
+        else
+        {
+            chatCell.chatUserImage.image = [userImageCache objectForKey:message.getFromId];
+            chatCell.chatUserImage.backgroundColor = [UIColor whiteColor];
+            [chatCell.chatUserLetterLabel setHidden:YES];
         }
         chatCell.authorType = iFlyChatBubbleTableViewCellAuthorTypeReceiver;
     }
     
     return chatCell;
+}
+
+-(BOOL) checkRegisteredUser:(NSString *)userId
+{
+    if([userId rangeOfString:@"0-"].location != NSNotFound)
+    {
+        return NO;
+    }
+    else
+    {
+        return YES;
+    }
+}
+
+-(void) setDefaultAvatarWithBackgroundColor:(NSString *)userNameWithoutPrefix userImageView:(UIImageView *)userImageView
+{
+    userImageView.backgroundColor = [Utility getColorFromNameWithoutPrefix:userNameWithoutPrefix];
+    userImageView.image = [UIImage imageNamed:@"MaleUser"];
+}
+
+-(void) setLetterAvatarWithBackgroundColor:(NSString *)userNameWithoutPrefix userImageView:(UIImageView *)userImageView userLetterLabel:(UILabel *)userLetterLabel
+{
+    if([[Utility getLetterFromNameWithoutPrefix:userNameWithoutPrefix] rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]].location != NSNotFound)
+    {
+        [userLetterLabel setHidden:YES];
+        [self setDefaultAvatarWithBackgroundColor:userNameWithoutPrefix userImageView:userImageView];
+    }
+    else
+    {
+        userImageView.backgroundColor = [Utility getColorFromNameWithoutPrefix:userNameWithoutPrefix];
+        userLetterLabel.text = [Utility getLetterFromNameWithoutPrefix:userNameWithoutPrefix];
+        [userLetterLabel setHidden:NO];
+        userImageView.image = nil;
+    }
+}
+
+-(void) setChatImage:(UIImageView *)userImageView userLetterLabel:(UILabel *)userLetterLabel userId:(NSString *)userId userName:(NSString *)userName userAvatarUrl:(NSString *)userAvatarUrl
+{
+    if([self checkRegisteredUser:userId])
+    {
+        if(userAvatarUrl.length != 0)
+        {
+            if([userAvatarUrl rangeOfString:@"default_avatar"].location != NSNotFound || [userAvatarUrl rangeOfString:@"gravatar"].location != NSNotFound )
+            {
+                if(use_default_avatar)
+                {
+                    //A registered user with no image set and we have to use only default image, no letter image
+                    [self setDefaultAvatarWithBackgroundColor:userName userImageView: userImageView];
+                    [userLetterLabel setHidden:YES];
+                }
+                else
+                {
+                    //A registered user with no image set and we are allowed to use letter image
+                    [self setLetterAvatarWithBackgroundColor:userName userImageView: userImageView userLetterLabel: userLetterLabel];
+                }
+            }
+            else
+            {
+                //A registered user with image set so use URL image
+                dispatch_async(fetchImage, ^{
+                    //Downloading images asynchronously
+                    [self loadImagesWithURL:[NSString stringWithFormat:@"%@%@",@"http:",userAvatarUrl] userImageView:userImageView userId:userId];
+                });
+                
+                [userLetterLabel setHidden:YES];
+                userImageView.backgroundColor = [UIColor whiteColor];
+            }
+        }
+        else if(use_default_avatar)
+        {
+            //A registered user with no URL for avatar and we have to use default image, no letter image
+            [self setDefaultAvatarWithBackgroundColor:userName userImageView: userImageView];
+            [userLetterLabel setHidden:YES];
+        }
+        else
+        {
+            //A registered user with no URL for avatar and we are allowed to use letter image
+            [self setLetterAvatarWithBackgroundColor:userName userImageView: userImageView userLetterLabel: userLetterLabel];
+        }
+    }
+    else
+    {
+        if(use_default_avatar)
+        {
+            //A guest user and we have to use default image, no letter image
+            [self setDefaultAvatarWithBackgroundColor:[Utility getNameWithoutPrefix:userName] userImageView: userImageView];
+            [userLetterLabel setHidden:YES];
+        }
+        else
+        {
+            //A guest user and we are allowed to use letter image
+            [self setLetterAvatarWithBackgroundColor:[Utility getNameWithoutPrefix:userName] userImageView: userImageView userLetterLabel: userLetterLabel];
+        }
+    }
 }
 
 
@@ -648,22 +1144,38 @@
     return size.height;
 }
 
--(void) loadImagesWithURL:(NSString *)imageURL IndexPath:(NSIndexPath *)indexPath userId:(NSString *)userId
+-(void) loadImagesWithURL:(NSString *)imageURL userImageView:(UIImageView *)userImageView userId:(NSString *)userId
 {
-    NSURL *url = [NSURL URLWithString:imageURL];
+    NSString *newURL =[imageURL stringByReplacingOccurrencesOfString:@"&#038;" withString:@"&"];
+    NSURL *url = [NSURL URLWithString:newURL];
     NSData *data = [[NSData alloc ] initWithContentsOfURL:url];
     
     UIImage *img = [UIImage imageWithData:data];
     
     //Caching the downloaded image
-    [userImageCache setObject:img forKey:userId];
+    if(img != nil)
+    {
+        [userImageCache setObject:img forKey:userId];
+    }
     
     dispatch_async(dispatch_get_main_queue(), ^{
         
         //Setting the image in the view
-        ChatTableViewCell *cell = (ChatTableViewCell *)[self.chatTable cellForRowAtIndexPath:indexPath];
-        cell.chatUserImage.image = img;
+        userImageView.image = img;
         
     });
+    
+    if(!imageAlreadySetFlag && receivedMessageGetImage)
+    {
+        dispatch_once(&setNavBarImage, ^{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.navBarUserImageView.image = img;
+                self.navBarUserImageView.backgroundColor = [UIColor whiteColor];
+                [self.navBarUserLetterLabel setHidden:YES];
+            });
+            imageAlreadySetFlag=YES;
+            receivedMessageGetImage=NO;
+        });
+    }
 }
 @end

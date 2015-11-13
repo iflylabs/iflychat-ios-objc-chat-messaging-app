@@ -19,6 +19,7 @@ typedef NS_ENUM(NSUInteger, AuthorType) {
 @property (strong, nonatomic) UILabel *chatNameLabel;
 @property (strong, nonatomic) UILabel *chatTimeLabel;
 @property (strong, nonatomic) UILabel *chatMessageLabel;
+@property (strong, nonatomic) UILabel *chatUserLetterLabel;
 @property (nonatomic, assign) AuthorType authorType;
 
 @end

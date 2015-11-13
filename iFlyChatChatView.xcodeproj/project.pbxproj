@@ -22,6 +22,12 @@
 		6EBACA0C1BA8095A0076B0B3 /* ApplicationData.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EBACA0B1BA8095A0076B0B3 /* ApplicationData.m */; };
 		6EBACA0F1BA8096B0076B0B3 /* ApplicationSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EBACA0E1BA8096B0076B0B3 /* ApplicationSettings.m */; };
 		6ED019201BAFDAE6005A7219 /* libicucore.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED0191F1BAFDAE6005A7219 /* libicucore.tbd */; };
+		6ED0C64A1BF5DB6F005336B1 /* Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0C6491BF5DB6F005336B1 /* Utility.m */; };
+		6ED0C6501BF5E2D4005336B1 /* ChatRoom.png in Resources */ = {isa = PBXBuildFile; fileRef = 6ED0C64B1BF5E2D4005336B1 /* ChatRoom.png */; };
+		6ED0C6511BF5E2D4005336B1 /* FemaleUser.png in Resources */ = {isa = PBXBuildFile; fileRef = 6ED0C64C1BF5E2D4005336B1 /* FemaleUser.png */; };
+		6ED0C6521BF5E2D4005336B1 /* MaleUser.png in Resources */ = {isa = PBXBuildFile; fileRef = 6ED0C64D1BF5E2D4005336B1 /* MaleUser.png */; };
+		6ED0C6531BF5E2D4005336B1 /* GeneralUser.png in Resources */ = {isa = PBXBuildFile; fileRef = 6ED0C64E1BF5E2D4005336B1 /* GeneralUser.png */; };
+		6ED0C6541BF5E2D4005336B1 /* iflychat_full.png in Resources */ = {isa = PBXBuildFile; fileRef = 6ED0C64F1BF5E2D4005336B1 /* iflychat_full.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +69,14 @@
 		6EBACA0D1BA8096B0076B0B3 /* ApplicationSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationSettings.h; sourceTree = "<group>"; };
 		6EBACA0E1BA8096B0076B0B3 /* ApplicationSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ApplicationSettings.m; sourceTree = "<group>"; };
 		6ED0191F1BAFDAE6005A7219 /* libicucore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.tbd; path = usr/lib/libicucore.tbd; sourceTree = SDKROOT; };
+		6ED0C6481BF5DB6F005336B1 /* Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
+		6ED0C6491BF5DB6F005336B1 /* Utility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utility.m; sourceTree = "<group>"; };
+		6ED0C64B1BF5E2D4005336B1 /* ChatRoom.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ChatRoom.png; sourceTree = "<group>"; };
+		6ED0C64C1BF5E2D4005336B1 /* FemaleUser.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FemaleUser.png; sourceTree = "<group>"; };
+		6ED0C64D1BF5E2D4005336B1 /* MaleUser.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MaleUser.png; sourceTree = "<group>"; };
+		6ED0C64E1BF5E2D4005336B1 /* GeneralUser.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GeneralUser.png; sourceTree = "<group>"; };
+		6ED0C64F1BF5E2D4005336B1 /* iflychat_full.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iflychat_full.png; sourceTree = "<group>"; };
+		6ED0C6561BF5E792005336B1 /* iFlyChatChatView.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = iFlyChatChatView.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +138,7 @@
 		6E7112AB1B6B5D8A001FDEC2 /* iFlyChatChatView */ = {
 			isa = PBXGroup;
 			children = (
+				6ED0C6561BF5E792005336B1 /* iFlyChatChatView.entitlements */,
 				6E7112B01B6B5D8B001FDEC2 /* AppDelegate.h */,
 				6E7112B11B6B5D8B001FDEC2 /* AppDelegate.m */,
 				6EA37D171BAC25F80007E55F /* ViewController */,
@@ -135,8 +150,11 @@
 				6E7112F71B6B7640001FDEC2 /* ChatTableViewCell */,
 				6E7112B61B6B5D8B001FDEC2 /* Main.storyboard */,
 				6E7112B91B6B5D8B001FDEC2 /* Images.xcassets */,
+				6ED0C6551BF5E2DA005336B1 /* Resources */,
 				6E7112BB1B6B5D8B001FDEC2 /* LaunchScreen.xib */,
 				6E7112AC1B6B5D8A001FDEC2 /* Supporting Files */,
+				6ED0C6481BF5DB6F005336B1 /* Utility.h */,
+				6ED0C6491BF5DB6F005336B1 /* Utility.m */,
 			);
 			path = iFlyChatChatView;
 			sourceTree = "<group>";
@@ -215,6 +233,18 @@
 			name = ApplicationSettings;
 			sourceTree = "<group>";
 		};
+		6ED0C6551BF5E2DA005336B1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6ED0C64B1BF5E2D4005336B1 /* ChatRoom.png */,
+				6ED0C64C1BF5E2D4005336B1 /* FemaleUser.png */,
+				6ED0C64D1BF5E2D4005336B1 /* MaleUser.png */,
+				6ED0C64E1BF5E2D4005336B1 /* GeneralUser.png */,
+				6ED0C64F1BF5E2D4005336B1 /* iflychat_full.png */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -265,6 +295,11 @@
 					6E7112A81B6B5D8A001FDEC2 = {
 						CreatedOnToolsVersion = 6.4;
 						DevelopmentTeam = ET385UDM96;
+						SystemCapabilities = {
+							com.apple.iCloud = {
+								enabled = 0;
+							};
+						};
 					};
 					6E7112C11B6B5D8B001FDEC2 = {
 						CreatedOnToolsVersion = 6.4;
@@ -296,9 +331,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6ED0C6501BF5E2D4005336B1 /* ChatRoom.png in Resources */,
 				6E7112B81B6B5D8B001FDEC2 /* Main.storyboard in Resources */,
+				6ED0C6541BF5E2D4005336B1 /* iflychat_full.png in Resources */,
 				6E7112BD1B6B5D8B001FDEC2 /* LaunchScreen.xib in Resources */,
+				6ED0C6511BF5E2D4005336B1 /* FemaleUser.png in Resources */,
 				6E7112BA1B6B5D8B001FDEC2 /* Images.xcassets in Resources */,
+				6ED0C6521BF5E2D4005336B1 /* MaleUser.png in Resources */,
+				6ED0C6531BF5E2D4005336B1 /* GeneralUser.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -323,6 +363,7 @@
 				6E7112B21B6B5D8B001FDEC2 /* AppDelegate.m in Sources */,
 				6E7112EB1B6B5E32001FDEC2 /* ChatTableViewCell.m in Sources */,
 				6E2FD85F1B78856D00FF51B2 /* ContentView.m in Sources */,
+				6ED0C64A1BF5DB6F005336B1 /* Utility.m in Sources */,
 				6E7112EA1B6B5E32001FDEC2 /* ChatViewController.m in Sources */,
 				6E6743021BA97F2B00B03D5E /* ChatCellSettings.m in Sources */,
 				6E7112AF1B6B5D8B001FDEC2 /* main.m in Sources */,
@@ -455,15 +496,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_ENTITLEMENTS = iFlyChatChatView/iFlyChatChatView.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iFlyChatChatView/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "iFlyLabs.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -472,15 +516,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_ENTITLEMENTS = iFlyChatChatView/iFlyChatChatView.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iFlyChatChatView/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "iFlyLabs.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

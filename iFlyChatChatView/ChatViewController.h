@@ -22,6 +22,7 @@
 
 @property (weak, nonatomic) IBOutlet UITextView *messageText;
 
+@property (weak, nonatomic) IBOutlet UIImageView *navBarUserImageView;
 
 @property (weak, nonatomic) IBOutlet UIImageView *userImage;
 

@@ -37,13 +37,14 @@ static DataClass *instance = nil;
 //Intialisation of chat
 -(void) initiFlyChatLibrary
 {
+    [Utilities setIsDebug:YES];
     //iFlyChatUserSession object with username, password and session key (if available)
 
     appData.session = [[iFlyChatUserSession alloc] initIFlyChatUserSessionwithUserName:@"userName" userPassword:@"userPassword" userSessionKey:@""];
     
     //iFlyChatConfig object with server host, auth URL, SSL connection boolean and iFlyChatUserSession object. These are the basic configuration parameters used to connect to iFlyChat's servers
     
-    appData.config = [[iFlyChatConfig alloc] initIFlyChatConfigwithServerHost:@"serverhost.com" authUrl:@"http://example.com/auth/url" isHttps:NO userSession:appData.session];
+    appData.config = [[iFlyChatConfig alloc] initIFlyChatConfigwithServerHost:@"serverhost.com" authUrl:@"http://example.com/auth/url" isHttps:NO];
     
     //If auto reconnection is required, set it to "YES"
     
@@ -121,6 +122,32 @@ static DataClass *instance = nil;
 -(void)sendMessageToRoom:(iFlyChatMessage *)message
 {
     [appData.service sendMessagetoRoom:message];
+}
+
+-(void)sendFileToUser:(iFlyChatMessage *)message
+{
+    [appData.service sendFiletoUser:message];
+}
+
+-(void)sendFileToRoom:(iFlyChatMessage *)message
+{
+    [appData.service sendFiletoRoom:message];
+}
+
+-(void)getUserThreadHistoryWithCurrentUserId:(NSString *)currentUserId
+                                   forUserId:(NSString *)forUserId
+                                 forUserName:(NSString *)forUserName
+                                   messageId:(NSString *)messageId
+{
+    [appData.service getUserThreadHistory:currentUserId forUserId:forUserId forUserName:forUserName messageId:messageId];
+}
+
+-(void)getRoomThreadHistoryWithCurrentUserId:(NSString *)currentUserId
+                                   forRoomId:(NSString *)forRoomId
+                                 forRoomName:(NSString *)forRoomName
+                                   messageId:(NSString *)messageId
+{
+    [appData.service getRoomThreadHistory:currentUserId forRoomId:forRoomId forRoomName:forRoomName messageId:messageId];
 }
 
 

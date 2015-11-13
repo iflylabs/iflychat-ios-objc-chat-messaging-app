@@ -28,6 +28,20 @@
 
 -(void)sendMessageToRoom:(iFlyChatMessage *)message;
 
+-(void)sendFileToUser:(iFlyChatMessage *)message;
+
+-(void)sendFileToRoom:(iFlyChatMessage *)message;
+
+-(void)getUserThreadHistoryWithCurrentUserId:(NSString *)currentUserId
+                                   forUserId:(NSString *)forUserId
+                                 forUserName:(NSString *)forUserName
+                                   messageId:(NSString *)messageId;
+
+-(void)getRoomThreadHistoryWithCurrentUserId:(NSString *)currentUserId
+                                   forRoomId:(NSString *)forRoomId
+                                 forRoomName:(NSString *)forRoomName
+                                   messageId:(NSString *)messageId;
+
 -(void) disconnect;
 
 @end

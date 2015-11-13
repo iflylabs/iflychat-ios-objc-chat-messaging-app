@@ -33,6 +33,7 @@
 @synthesize chatNameLabel;
 @synthesize chatTimeLabel;
 @synthesize chatMessageLabel;
+@synthesize chatUserLetterLabel;
 
 NSLayoutConstraint *height;
 NSLayoutConstraint *width;
@@ -98,6 +99,10 @@ static ChatCellSettings *chatCellSettings = nil;
     
     [chatMessageLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
     
+    chatUserLetterLabel = [[UILabel alloc] init];
+    
+    [chatUserLetterLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
     [self.contentView addSubview:Bubble];
     
     [Bubble addSubview:DownCurve];
@@ -106,12 +111,11 @@ static ChatCellSettings *chatCellSettings = nil;
     [Bubble addSubview:UpCurve];
     [Bubble addSubview:HidingLayerSide];
     [Bubble addSubview:chatUserImage];
+    [Bubble addSubview:chatUserLetterLabel];
     
     [Main addSubview:chatNameLabel];
     [Main addSubview:chatTimeLabel];
     [Main addSubview:chatMessageLabel];
-    
-    chatUserImage.image = [UIImage imageNamed:@"defaultUser.png"];
     
     chatNameLabel.text = @"chatNameLabel";
     
@@ -220,12 +224,27 @@ static ChatCellSettings *chatCellSettings = nil;
     
     //Setting constraints for chatUserImage. Its superview is Bubble. It should be at 0 distance from right and bottom of superview and 5 distance from Main. Height and width should be 25 and 25.
     
-    height = [NSLayoutConstraint constraintWithItem:chatUserImage attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.f constant:25.0f];
+    height = [NSLayoutConstraint constraintWithItem:chatUserImage attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.f constant:30.0f];
     
-    width = [NSLayoutConstraint constraintWithItem:chatUserImage attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.f constant:25.0f];
+    width = [NSLayoutConstraint constraintWithItem:chatUserImage attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.f constant:30.0f];
     
     
     vertical = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[chatUserImage]-0-|" options:NSLayoutFormatAlignAllBottom metrics:nil views:NSDictionaryOfVariableBindings(chatUserImage)];
+    
+    [Bubble addConstraints:@[height,width]];
+    
+    [Bubble addConstraints:vertical];
+    
+    // /////////////////////////////////////////////////////////////////////////////////////////////
+    
+    //Setting constraints for chatUserLetterLabel. Its superview is Bubble. It should be at 0 distance from right and bottom of superview and 5 distance from Main. Height and width should be 25 and 25.
+    
+    height = [NSLayoutConstraint constraintWithItem:chatUserLetterLabel attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.f constant:30.0f];
+    
+    width = [NSLayoutConstraint constraintWithItem:chatUserLetterLabel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.f constant:30.0f];
+    
+    
+    vertical = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[chatUserLetterLabel]-0-|" options:NSLayoutFormatAlignAllBottom metrics:nil views:NSDictionaryOfVariableBindings(chatUserLetterLabel)];
     
     [Bubble addConstraints:@[height,width]];
     
@@ -246,12 +265,12 @@ static ChatCellSettings *chatCellSettings = nil;
     //Setting width constraint for chatNameLabel
     
     NSLayoutConstraint *proportionalWidth = [NSLayoutConstraint constraintWithItem:chatNameLabel
-                                                         attribute:NSLayoutAttributeWidth
-                                                         relatedBy:NSLayoutRelationEqual
-                                                            toItem:Main
-                                                         attribute:NSLayoutAttributeWidth
-                                                        multiplier:.5
-                                                          constant:0];
+                                                                         attribute:NSLayoutAttributeWidth
+                                                                         relatedBy:NSLayoutRelationEqual
+                                                                            toItem:Main
+                                                                         attribute:NSLayoutAttributeWidth
+                                                                        multiplier:.5
+                                                                          constant:0];
     
     proportionalWidth.priority = 750;
     
@@ -261,7 +280,7 @@ static ChatCellSettings *chatCellSettings = nil;
     [chatNameLabel setContentCompressionResistancePriority:250 forAxis:UILayoutConstraintAxisHorizontal];
     
     // ////////////////////////////////////////////////////////////////////////////////////////////
-
+    
     
     //Setting the constraints for chatNameLabel. It should be at 16 distance from right and left of superview, i.e., Main and 8 distance from top and chatMessageLabel which is at 8 distance from chatTimeLabel which is at 8 distance from bottom of superview.
     
@@ -274,7 +293,7 @@ static ChatCellSettings *chatCellSettings = nil;
     // /////////////////////////////////////////////////////////////////////////////////////////////
     
     self.contentView.backgroundColor = [UIColor whiteColor];
-
+    
     
     Bubble.backgroundColor = [UIColor whiteColor];
     
@@ -288,6 +307,9 @@ static ChatCellSettings *chatCellSettings = nil;
     
     [chatMessageLabel setPreferredMaxLayoutWidth:220.0f];
     
+    chatUserLetterLabel.textAlignment = NSTextAlignmentCenter;
+    chatUserLetterLabel.font = [UIFont boldSystemFontOfSize:13];
+    chatUserLetterLabel.textColor = [UIColor whiteColor];
     return self;
 }
 
@@ -299,7 +321,7 @@ static ChatCellSettings *chatCellSettings = nil;
     Main.layer.cornerRadius = 16.0f;
     UpCurve.layer.cornerRadius = 10.0f;
     DownCurve.layer.cornerRadius = 25.0f;
-    chatUserImage.layer.cornerRadius = 12.5f;
+    chatUserImage.layer.cornerRadius = 15.0f;
     chatUserImage.layer.masksToBounds = YES;
 }
 
@@ -314,7 +336,7 @@ static ChatCellSettings *chatCellSettings = nil;
         
         
         [self.contentView addConstraints:horizontal];
-
+        
         // /////////////////////////////////////////////////////////////////////////////////////////////
         
         //Setting constraints for Main block. It contains name, message and time labels. Main should be at a zero distance from bottom and left of its superview, i.e., Bubble
@@ -325,26 +347,26 @@ static ChatCellSettings *chatCellSettings = nil;
         [Bubble addConstraints:horizontal];
         
         // /////////////////////////////////////////////////////////////////////////////////////////////
-
+        
         //Setting constraints for UpCurve. It should be at zero distance from Main on left side, -1 distance from bottom and 10 distance from right of the superview, i.e., Bubble. Height and Width should be 32 and 20 respectively
         
         
-        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[Main]-0-[UpCurve]-10-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(Main,UpCurve)];
+        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[Main]-0-[UpCurve]-15-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(Main,UpCurve)];
         
         
         [Bubble addConstraints:horizontal];
         
         // /////////////////////////////////////////////////////////////////////////////////////////////
-
+        
         //Setting constraints for DownCurve. It should be at a 0 distance from right and bottom of superview and -20 distance from Main on the left. Its superview is Bubble. The height and width should be 25 and 50 respectively.
         
         
-        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[Main]-(-20)-[DownCurve]-(0)-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(Main,DownCurve)];
+        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[Main]-(-20)-[DownCurve]-(5)-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(Main,DownCurve)];
         
         [Bubble addConstraints:horizontal];
-
+        
         // /////////////////////////////////////////////////////////////////////////////////////////////
-
+        
         //Setting constraints for HidingLayerSide. Superview is Bubble. Right and bottom distances should be 0 and top should be greater than 0. Height and Width are 32 and 15 respectively.
         
         horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[HidingLayerSide]-0-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(HidingLayerSide)];
@@ -352,7 +374,7 @@ static ChatCellSettings *chatCellSettings = nil;
         [Bubble addConstraints:horizontal];
         
         // /////////////////////////////////////////////////////////////////////////////////////////////
-
+        
         //Setting constraints for HidingLayerTop. Superview is Bubble. Right, left and top distances should be 0 and bottom should be 20.
         
         horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[HidingLayerTop]-0-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(HidingLayerTop)];
@@ -362,7 +384,7 @@ static ChatCellSettings *chatCellSettings = nil;
         [Bubble addConstraints:horizontal];
         
         // /////////////////////////////////////////////////////////////////////////////////////////////
-
+        
         //Setting constraints for chatUserImage. Its superview is Bubble. It should be at 0 distance from right and bottom of superview and 5 distance from Main. Height and width should be 25 and 25.
         
         
@@ -371,7 +393,16 @@ static ChatCellSettings *chatCellSettings = nil;
         [Bubble addConstraints:horizontal];
         
         // /////////////////////////////////////////////////////////////////////////////////////////////
-
+        
+        //Setting constraints for chatUserLetterLabel. Its superview is Bubble. It should be at 0 distance from right and bottom of superview and 5 distance from Main. Height and width should be 25 and 25.
+        
+        
+        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[Main]-5-[chatUserLetterLabel]-0-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(Main,chatUserLetterLabel)];
+        
+        [Bubble addConstraints:horizontal];
+        
+        // /////////////////////////////////////////////////////////////////////////////////////////////
+        
         //Setting the constraints for chatTimeLabel. It should be 16 distance from right and left of superview, i.e., Main.
         
         horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[chatTimeLabel]-16-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(chatTimeLabel)];
@@ -440,7 +471,7 @@ static ChatCellSettings *chatCellSettings = nil;
         //Setting constraints for UpCurve. It should be at zero distance from Main on right side, -1 distance from bottom and 10 distance from left of the superview, i.e., Bubble. Height and Width should be 32 and 20 respectively
         
         
-        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[UpCurve]-0-[Main]" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(UpCurve,Main)];
+        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-15-[UpCurve]-0-[Main]" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(UpCurve,Main)];
         
         
         [Bubble addConstraints:horizontal];
@@ -450,7 +481,7 @@ static ChatCellSettings *chatCellSettings = nil;
         //Setting constraints for DownCurve. It should be at a 0 distance from left and bottom of superview and -20 distance from Main on the right. Its superview is Bubble. The height and width should be 25 and 50 respectively.
         
         
-        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[DownCurve]-(-20)-[Main]" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(DownCurve,Main)];
+        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-5-[DownCurve]-(-20)-[Main]" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(DownCurve,Main)];
         
         [Bubble addConstraints:horizontal];
         
@@ -489,6 +520,17 @@ static ChatCellSettings *chatCellSettings = nil;
         
         // /////////////////////////////////////////////////////////////////////////////////////////////
         
+        //Setting constraints for chatUserLetterLabel. Its superview is Bubble. It should be at 0 distance from left and bottom of superview and 5 distance from Main on the right. Height and width should be 25 and 25.
+        
+        horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[chatUserLetterLabel]-5-[Main]" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(chatUserLetterLabel,Main)];
+        
+        vertical = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[chatUserLetterLabel]-0-|" options:NSLayoutFormatAlignAllBottom metrics:nil views:NSDictionaryOfVariableBindings(chatUserLetterLabel)];
+        
+        
+        [Bubble addConstraints:horizontal];
+        
+        // /////////////////////////////////////////////////////////////////////////////////////////////
+        
         //Setting the constraints for chatTimeLabel. It should be 16 distance from right and left of superview, i.e., Main.
         
         horizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[chatTimeLabel]-16-|" options:NSLayoutFormatDirectionLeftToRight metrics:nil views:NSDictionaryOfVariableBindings(chatTimeLabel)];
@@ -504,7 +546,7 @@ static ChatCellSettings *chatCellSettings = nil;
         [Main addConstraints:horizontal];
         
         // /////////////////////////////////////////////////////////////////////////////////////////////
-
+        
         if(![chatCellSettings getReceiverBubbleTail])
         {
             [DownCurve setHidden:YES];
